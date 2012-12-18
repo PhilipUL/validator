@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Solas Component Template pollingSolas.html</title>
+<!--
+Creation Date: 21 February 2012
+Author: Ian O'Keeffe
+
+Modification History:
+--------------------------
+15-03-2012
+This page controls calling LocConnect to see if a job is available, and if so, to process it.
+pollingSolas.html -> solas_api.php (API to the Project Management User Interface of LocConnect)
+It polls LocConnect every second
+
+--------------------------
+
+-->
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+$("#LocConnectStatus").load("solas_api.php");
+var refreshId = setInterval(function() {
+$("#LocConnectStatus").load("solas_api.php");
+}, 1000);
+});
+</script>
+<!-- This javascript polls LocConnect via apipmui.php every 1000 milliseconds. -->
+
+</head>
+<body>
+<h2>Solas Component Template - pollingSolas.html</h2>
+<br>
+<hr />
+<br>
+
+LocConnect Status:
+<div id="LocConnectStatus"></div>
+
+<br>
+<hr />
+<br>
+</body>
+</html>

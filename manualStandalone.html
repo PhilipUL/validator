@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Solas Component Template manualStandalone.html</title>
+<!--
+Creation Date: 21 February 2012
+Author: Ian O'Keeffe
+
+Modification History:
+--------------------------
+15-03-2012
+This page controls a standalone instantiation of a component:
+manualStandalone.html -> upload.php (uploads required files manually rather than via HTTP messaging)
+
+This processes a file directly via an embedded form
+--------------------------
+
+-->
+</head>
+<body>
+<h2>Solas Component Template - manualStandalone.html</h2>
+<br>
+<hr />
+<br>
+<p>Select an XLIFF file for standalone processing </p>
+<!-- Put a call here to select an XLIFF file for standalone processing -->
+<div id="standalone">
+<form action="upload.php" method="post" enctype="multipart/form-data"><label for="file">Filename:</label>
+<input name="userfile" id="file" type="file"/><br><br>
+<input name="submit" value="Process File" type="submit"/>
+</form>
+</div>
+<br>
+<br>
+<hr />
+
+</body>
+</html>

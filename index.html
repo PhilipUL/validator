@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Solas Component Template index.html</title>
+<!--
+Creation Date: 21 February 2012
+Author: Ian O'Keeffe
+
+Modification History:
+--------------------------
+21-02-2012
+This is the top-level index.html for creating a Solas Component.
+
+It permits branching to either a LocConnect-controlled workflow:
+pollingSolas.html -> solas_api.php (API to the Project Management User Interface of LocConnect)
+It polls LocConnect every second
+
+or a standalone instantiation:
+manualStandalone.html -> upload.php (uploads required files manually rather than via HTTP messaging)
+
+This processes a file directly via an embedded form
+
+
+index.html______________
+|						|
+pollingSolas.html		manualStandalone.html
+|						|
+solas_api.php			upload.php
+|	|					|
+|	SolasAPI.class.php	|
+|						|
+|						|
+doStuffToXLIFF_file.php
+
+--------------------------
+
+-->
+
+</head>
+<body>
+
+<h1>Solas Component Template - index.html</h1>
+<br>
+<hr />
+<br>
+<b>
+This is the top-level index.html for creating a Solas Component.<br>
+It permits branching to either a LocConnect-controlled workflow:
+</b>
+<br>
+pollingSolas.html -> solas_api.php (API to the Project Management User Interface of LocConnect)<br>
+It polls LocConnect every second<br>
+
+<br>
+<h2>
+<a href="pollingSolas.html">Go online and start polling Solas</a>
+</h2>
+<br>
+<br>
+<hr />
+<br>
+<b>
+Or a standalone instantiation:<br>
+</b>
+manualStandalone.html -> upload.php (uploads required files manually rather than via HTTP messaging)<br>
+This processes a file directly via an embedded form<br>
+<br>
+<h2>
+<a href="manualStandalone.html">Run component as standalone for testing</a> 
+</h2>
+<br>
+<hr />
+</body>
+</html>
