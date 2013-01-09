@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="datacategories-definition.rnc" type="compact"?>
+<datacats xmlns:its="http://www.w3.org/2005/11/its" xmlns="http://example.com/datacats"
+    xmlns:datc="http://example.com/datacats">
+      <datacat name="translation">
+        <inheritance appliesTo="elementsAndAttributes"/>
+        <rulesElement name="langRule"/>
+    </datacat>
+	<datacat name="translate">
+        <inheritance appliesTo="onlyElements"/>
+        <rulesElement name="translateRule"/>
+		<defaults>
+			<defaultsElements translate="yes"/>
+			<defaultsAttributes translate="no"/>
+		</defaults>
+    </datacat>
+</datacats>

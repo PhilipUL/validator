@@ -10,6 +10,8 @@ This is a locConnect Solas API Class
 It wraps the API calls to make component creation easier
 
 */
+
+require_once 'Validator/validator.php';
 class SolasAPI {
 
 	//locConnect Solas API public functions
