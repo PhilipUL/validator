@@ -17,6 +17,65 @@ require_once file_exists('../settings.class.php')? '../settings.class.php':"sett
  */
 class validator extends Resource {
 //$version = 0;
+    
+
+static public function alphabeticOrder($data)
+{			
+        $dataArray = split("\n", $data);
+        $size = sizeof($dataArray);
+        $count = 0;
+        $attsorderelements = array();
+        $collections = array();
+        $alphabeticOrderElements = array();
+        
+        for($k = 0; $k <= $size; $k++)
+        {
+            try{
+                    $st = split("\t", $dataArray[$k]); // split the current line by tab
+                    $att = $st[0]; // take the first element 
+                    
+                    if (strpos($att,'@') !== false) // and check if it contain @ an attribute symbol
+                    {
+                       $count++; // note the presence of an attribute on the current line
+                    }  else { // if we have reached the stage were we can't find any more attribute symbols, this marks the end of the nodes associated with a parent
+                        if ($count >= 1) // if it turns out that there was at least one attribute
+                        {
+                            while($count != 0) // then we need to start going back over the last nodes storing the other attributes associated with that parent
+                            {
+                                $st = split("\t", $dataArray[$k-$count]);
+                                $att = $st[0];
+                                $count--;
+                                array_push($attsorderelements, $att);
+                            }
+                            $collections = $attsorderelements;
+                            sort($collections, SORT_STRING);
+                            
+                            $subCount = sizeof($attsorderelements);
+                            $size = $subCount;
+                            for($j = 0; $j < $subCount; $j++) ////////////////
+                            {
+                                while($size != 0)
+                                {
+                                    if(strpos($dataArray[$k - $size], $attsorderelements[$j]))
+                                    {
+                                       array_push($alphabeticOrderElements, $dataArray[$k - $size]);
+                                    }
+                                    $size--;
+                                }
+                            }
+                        }
+                        $count = 0;
+                        array_push($alphabeticOrderElements, $dataArray[$k]);
+                    }
+               } catch (Exception $ex)
+               {
+                   
+               }
+               
+        }
+        $alphabeticOrderElements = implode("\n", $alphabeticOrderElements);
+        return $alphabeticOrderElements;
+}    
 
 // called by either solas.api or apache
 static public function validate($data, $jobid, $dataCategory)
@@ -42,18 +101,16 @@ static public function validate($data, $jobid, $dataCategory)
         shell_exec("mkdir ".$ITS_Path."uploads/$jobid");
         shell_exec("chmod 777 -R ".$ITS_Path."uploads");
         $data=trim(preg_replace('/<\?xml version.*;?>/i', "", $data));
-        if(strpos($data, "<content>")){
-            $pos = strpos($data, "<content>");
-            if($pos !== false)
-            {
-                $data = substr_replace($data, "", $pos, strlen("<content>"));
-            }
-            
-            $pos = strrpos($data, "</content>");
-            if($pos !== false)
-            {
-                $data = substr_replace($data, "", $pos, strlen("</content>"));
-            }
+        $pos = strpos($data, "<content>");
+        if($pos !== false)
+        {
+            $data = substr_replace($data, "", $pos, strlen("<content>"));
+        }
+
+        $pos = strrpos($data, "</content>");
+        if($pos !== false)
+        {
+            $data = substr_replace($data, "", $pos, strlen("</content>"));
         }
         $output = $data;
         
@@ -77,6 +134,7 @@ static public function validate($data, $jobid, $dataCategory)
         $output=$output."\n";
         file_put_contents($ITS_Path."uploads/$jobid/output.txt", $output);
         $response->code = 200;
+        //$output = validator::alphabeticOrder($output);
         return $output;
         
         
