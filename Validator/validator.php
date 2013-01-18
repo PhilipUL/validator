@@ -27,6 +27,11 @@ static public function alphabeticOrder($data)
         $attsorderelements = array();
         $collections = array();
         $alphabeticOrderElements = array();
+        for($m = 0; $m <= $size; $m++)
+        {
+            echo "<br>$dataArray[$m]";
+        }
+        echo "<br>size = $size";
         
         for($k = 0; $k <= $size; $k++)
         {
@@ -69,13 +74,55 @@ static public function alphabeticOrder($data)
                     }
                } catch (Exception $ex)
                {
-                   
+                   if ($count >= 1)
+                   {
+                      $attsorderelements = array();
+                      while($count != 0)
+                      {
+                          $st = split("\t", $dataArray[$k]);
+                          $att = $st[0];
+                          $count--;
+                          array_push($attsorderelements, $att);
+                      }
+                      
+                      sort($collections, SORT_STRING);
+                      for($l = 0; $l < sizeof($attsorderelements); $l++)
+                      {
+                          $size = sizeof($attsorderelements);
+                          while($size != 0)
+                          {
+                              if(strpos($dataArray[$k - $size], $attsorderelements[$l]))
+                              {
+                                  array_push($alphabeticOrderElements, $dataArray[$k - $size]);
+                              }
+                              $size--;
+                          }
+                      }
+                   }
+                   $count = 0;
                }
                
         }
         $alphabeticOrderElements = implode("\n", $alphabeticOrderElements);
         return $alphabeticOrderElements;
-}    
+}
+
+static public function clenseIts($data)
+{			
+        $dataArray = split("\n", $data);
+        $result ="";
+        foreach($dataArray as $line){
+            $temp = split("\t",$line);
+            $result.=$temp[0];
+            if(sizeof($temp)==2){
+                $result.="\t".str_replace("its:", "",$temp[1]);
+            }
+            $result.="\n";
+        }
+        
+        return $result;
+}
+
 
 // called by either solas.api or apache
 static public function validate($data, $jobid, $dataCategory)
@@ -131,7 +178,7 @@ static public function validate($data, $jobid, $dataCategory)
         $output=trim(str_replace("\t\n","\n", str_replace("    ","\t", $output)));
         
         
-        $output=$output."\n";
+        $output=validator::clenseIts($output."\n");
         file_put_contents($ITS_Path."uploads/$jobid/output.txt", $output);
         $response->code = 200;
         //$output = validator::alphabeticOrder($output);
