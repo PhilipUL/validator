@@ -115,11 +115,14 @@ static public function clenseIts($data)
             $temp = split("\t",$line);
             $result.=$temp[0];
             if(sizeof($temp)==2){
-                $result.="\t".str_replace("its:", "",$temp[1]);
+                $result.="\t".strtolower(str_replace("its:", "",$temp[1]));
             }
             $result.="\n";
         }
         
+        //if(strpos($result,"<!DOCTYPE"."html>");  
+        
+                                                                                                                                                                                                                                                                                                    
         return $result;
 }
 
@@ -127,18 +130,41 @@ static public function clenseIts($data)
 // called by either solas.api or apache
 static public function validate($data, $jobid, $dataCategory)
 {
+    $extension; 
     
-//    $versionImport =null;
-//	if(isset($_GET['version']))	$versionImport =$_GET['version'];
-//
-//
-//	if ($versionImport == Null || trim($versionImport) == '') // if $versionImport is null
-//	{
-//		$version = 1.2;
-//	} else if ($versionImport != 2.0)
-//	{
-//		$version = 1.2;
-//	}
+    try {
+                // Get the LocConnect URL from the .ini file
+                $urlSettings = new Settings();
+                $baseURL = $urlSettings->get('general.BASE_URL');
+                // Get the filename associated with the ID using get_extension
+                $request = new HTTP_Request2($baseURL."/get_extension.php?id=$jobid");
+                $request->setMethod(HTTP_Request2::METHOD_GET);
+                $response = $request->send();
+
+                if (200 == $response->getStatus()) 
+                {
+                    // get the filename from the HTTP request by calling getBody(), then get rid of the content tags
+                    $filename=$response->getBody();
+                    $filename= str_replace('<content>', '', $filename);
+
+                    $extension = substr(strrchr($filename,'.'),1);
+
+                } 
+                else 
+                {
+                   $res='Unexpected HTTP status: ' . $response->getStatus() . ' ' .
+                   $response->getReasonPhrase();
+                   return $response;
+                }
+
+            } catch (HTTP_Request2_Exception $e) 
+            {
+               $res='Error: ' . $e->getMessage();
+               return $res;
+            }
+    
+        
+
         $itsSettings = new Settings();
         $ITS_Path = $itsSettings->get('general.ITS_PATH');
         
@@ -163,25 +189,51 @@ static public function validate($data, $jobid, $dataCategory)
         
 ////       
         shell_exec("cp ".$ITS_Path."tools/datacategories-2-xsl.xsl ".$ITS_Path."uploads/$jobid/");
+        
+        
+       
+        file_put_contents($ITS_Path."uploads/$jobid/debugMessage1.xml", $extension);
+        $errors;
+        if(strcmp($extension, "html") == 0)
+        {
+//            // convert from html to xhtml
+//            shell_exec("java -jar ".$ITS_Path."lib/jtidy-r938.jar -i -m -wrap 400 -f errors.txt ".$ITS_Path."uploads/$jobid/inputfile"."$extension");
+//            $errors = "attempted to run jtidy";
+            $config = array(
+           'indent'         => true,
+           'output-xhtml'   => true,
+                
+            );
+            
+            $tidy= new tidy();
+            $data=$tidy->repairString($data, $config, 'utf8');
+            file_put_contents($ITS_Path."uploads/$jobid/debugMessage2.xml", "Data was tidied");
+        } 
+         // cannot have extension hard coded
         file_put_contents($ITS_Path."uploads/$jobid/inputfile.xml", $data);
 //        
         shell_exec("java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/intermediate.xsl ".$ITS_Path."tools/$dataCategory/datacategories-definition.xml ".$ITS_Path."uploads/$jobid/datacategories-2-xsl.xsl inputDatacats=$dataCategory inputDocUri=".$ITS_Path."uploads/$jobid/inputfile.xml");
-        
+        //shell_exec("chmod 777 -R ".$ITS_Path."uploads/$jobid/");
+        echo "java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/nodelist-with-its-information.xml ".$ITS_Path."uploads/$jobid/inputfile.xml".$ITS_Path."uploads/$jobid/intermediate.xsl";
         shell_exec("java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/nodelist-with-its-information.xml ".$ITS_Path."uploads/$jobid/inputfile.xml ".$ITS_Path."uploads/$jobid/intermediate.xsl");
-        
+        shell_exec("chmod 777 -R ".$ITS_Path."uploads/$jobid/");
         shell_exec("java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/output.txt ".$ITS_Path."uploads/$jobid/nodelist-with-its-information.xml ".$ITS_Path."tools/tabdelimiting.xsl");
-        
+        shell_exec("chmod 777 -R ".$ITS_Path."uploads/$jobid/");
         
         
         $output = file_get_contents($ITS_Path."uploads/$jobid/output.txt");
         $output = str_replace("text=\t","",str_replace("path=/","/", $output));
-        $output=trim(str_replace("\t\n","\n", str_replace("    ","\t", $output)));
+        $output = str_replace("\t\n","\n", str_replace("    ","\t", $output));
+        
+        $output=trim(str_replace("\n\n","\n", $output));
+        $output=validator::clenseIts($output);
         
         
-        $output=validator::clenseIts($output."\n");
+        
+        
         file_put_contents($ITS_Path."uploads/$jobid/output.txt", $output);
-        $response->code = 200;
-        //$output = validator::alphabeticOrder($output);
+        //$response->code = 200;
+
         return $output;
         
         
