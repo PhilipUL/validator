@@ -16,7 +16,7 @@
 <!--    <localAdding datcatSelector="*[@its:translate] | its:span[@translate | its:translateRule]"
             addedMarkup="@its:translate | @translate[parent::its:span or parent::its:translateRule]"
         />-->
-    <localAdding datcatSelector="*[@*:translate] | its:span[@*:translate]"
+    <localAdding datcatSelector="*[@*:translate[not(ancestor::*:rules)]] | its:span[@*:translate[not(ancestor::*:rules)] | *:translateRule[not(ancestor::*:rules)]]"
             addedMarkup="@*:translate | @*:translate[parent::its:span]"
         />
     </datacat>
