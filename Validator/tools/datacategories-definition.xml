@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="datacategories-definition.rnc" type="compact"?>
+<datacats xmlns:its="http://www.w3.org/2005/11/its" xmlns="http://example.com/datacats"
+    xmlns:datc="http://example.com/datacats">
+    <datacat name="languageinformation">
+        <inheritance appliesTo="elementsAndAttributes"/>
+        <rulesElement name="langRule"/>
+    </datacat>
+    <datacat name="translate">
+        <inheritance appliesTo="onlyElements"/>
+        <rulesElement name="translateRule"/>
+        <defaults>
+                <defaultsElements translate="yes"/>
+                <defaultsAttributes translate="no"/>
+        </defaults>
+        <localAdding datcatSelector="*[@*:translate[not(ancestor::*:rules)]] | its:span[@*:translate[not(ancestor::*:rules)] | *:translateRule[not(ancestor::*:rules)]]"
+                addedMarkup="@*:translate | @*:translate[parent::its:span]"
+            />
+    </datacat>
+    <datacat name="locnote">
+        <inheritance appliesTo="onlyElements"/>
+        <rulesElement name="locNoteRule"/>
+<!--        <localAdding datcatSelector="*[@*:its-loc-note] | its:span[@*:its-loc-note] | its:span[@*:locNote] | *[@*:locNote]"
+                addedMarkup="@*:its-loc-note | @*:its-loc-note[parent::its:span] | @*:locNote | @*:locNote[parent::its:span]"
+            />
+        <localAdding datcatSelector="*[@*:its-loc-note-type] | its:span[@*:its-loc-note-type] | its:span[@*:locNoteType] | *[@*:locNoteType]"
+            addedMarkup="@*:its-loc-note-type | @*:its-loc-note-type[parent::its:span] | @*:locNoteType | @*:locNoteType[parent::its:span]"
+        />-->
+        <localAdding
+            datcatSelector="*[@its-loc-note] | its:span[@its-loc-note] | *[@its-loc-note-type] | its:span[@its-loc-note-type]| *[@its-loc-note-ref] | its:span[@its-loc-note-ref]"
+            addedMarkup="@its-loc-note |@its-loc-note-type | @its-loc-note-ref | @its-loc-note[parent::its:span] | @its-loc-note-type[parent::its:span] | @its-loc-note-ref[parent::its:span]"/>
+            
+    </datacat>
+</datacats>

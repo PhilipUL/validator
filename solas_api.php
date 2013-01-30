@@ -125,7 +125,7 @@ function  processJobs ($componentName){
             // have to validate against all the datacategories  
             
             
-            $tabDelimitedOutput = validator::validate($file, $jobId, "translate");                
+            $tabDelimitedOutput = validator::validate($file, $jobId, "locnote");                
             echo '<br> $tabDelimitedOutput: '.$tabDelimitedOutput; //IOK for testing	
 
 

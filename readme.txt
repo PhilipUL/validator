@@ -37,6 +37,7 @@ solas_api.php			upload.php
 doStuffToXLIFF_file.php
 
 
+must change permission of the uploads folder or change the owner
 
 index.html
 --------------------------

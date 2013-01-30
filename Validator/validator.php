@@ -107,15 +107,32 @@ static public function alphabeticOrder($data)
         return $alphabeticOrderElements;
 }
 
-static public function clenseIts($data)
+static public function clenseIts($data, $datacat)
 {			
         $dataArray = split("\n", $data);
         $result ="";
         foreach($dataArray as $line){
             $temp = split("\t",$line);
             $result.=$temp[0];
-            if(sizeof($temp)==2){
-                $result.="\t".strtolower(str_replace("its:", "",$temp[1]));
+            if(sizeof($temp)>=2){
+                for($i = 1; $i < sizeof($temp); $i++)
+                {
+                        
+                    if($datacat == "translate")
+                    {
+                        $result.="\t".strtolower(str_replace("its:", "",$temp[$i]));
+                    } else if($datacat == "locnote")
+                    {
+                        $result.="\t";
+                        $pair= split("=", $temp[$i]);
+                        if(strcasecmp("its-loc-note", $pair[0])==0){ 
+                            $result.="locNote={$pair[1]}";
+                        }else if(strcasecmp("its-loc-note-type", $pair[0])==0){
+                            $result.="locNoteType=".strtolower($pair[1]);
+                        }
+                    }   
+
+                }
             }
             $result.="\n";
         }
@@ -212,12 +229,15 @@ static public function validate($data, $jobid, $dataCategory)
          // cannot have extension hard coded
         file_put_contents($ITS_Path."uploads/$jobid/inputfile.xml", $data);
 //        
-        shell_exec("java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/intermediate.xsl ".$ITS_Path."tools/$dataCategory/datacategories-definition.xml ".$ITS_Path."uploads/$jobid/datacategories-2-xsl.xsl inputDatacats=$dataCategory inputDocUri=".$ITS_Path."uploads/$jobid/inputfile.xml");
+        shell_exec("java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/intermediate.xsl ".$ITS_Path."tools/datacategories-definition.xml ".$ITS_Path."uploads/$jobid/datacategories-2-xsl.xsl inputDatacats=$dataCategory inputDocUri=".$ITS_Path."uploads/$jobid/inputfile.xml");
+        echo "java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/intermediate.xsl ".$ITS_Path."tools/datacategories-definition.xml ".$ITS_Path."uploads/$jobid/datacategories-2-xsl.xsl inputDatacats=$dataCategory inputDocUri=".$ITS_Path."uploads/$jobid/inputfile.xml";
         //shell_exec("chmod 777 -R ".$ITS_Path."uploads/$jobid/");
-        echo "java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/nodelist-with-its-information.xml ".$ITS_Path."uploads/$jobid/inputfile.xml".$ITS_Path."uploads/$jobid/intermediate.xsl";
+        
         shell_exec("java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/nodelist-with-its-information.xml ".$ITS_Path."uploads/$jobid/inputfile.xml ".$ITS_Path."uploads/$jobid/intermediate.xsl");
+        echo "<br> java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/nodelist-with-its-information.xml ".$ITS_Path."uploads/$jobid/inputfile.xml ".$ITS_Path."uploads/$jobid/intermediate.xsl";
         shell_exec("chmod 777 -R ".$ITS_Path."uploads/$jobid/");
         shell_exec("java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/output.txt ".$ITS_Path."uploads/$jobid/nodelist-with-its-information.xml ".$ITS_Path."tools/tabdelimiting.xsl");
+        echo "<br> java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/output.txt ".$ITS_Path."uploads/$jobid/nodelist-with-its-information.xml ".$ITS_Path."tools/tabdelimiting.xsl";
         shell_exec("chmod 777 -R ".$ITS_Path."uploads/$jobid/");
         
         
@@ -226,7 +246,7 @@ static public function validate($data, $jobid, $dataCategory)
         $output = str_replace("\t\n","\n", str_replace("    ","\t", $output));
         
         $output=trim(str_replace("\n\n","\n", $output));
-        $output=validator::clenseIts($output);
+        $output=validator::clenseIts($output,$dataCategory);
         
         
         
