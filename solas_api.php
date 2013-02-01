@@ -119,13 +119,28 @@ function  processJobs ($componentName){
     if(isset($jobId)) {
             $file = $solasApi->solas_get_job($componentName, $jobId, $locConnect); // 
 
+            $rulesFile = $solasApi->solas_get_resource($jobId, $locConnect, "ITS");
+            $data=trim(preg_replace('/<\?xml version.*;?>/i', "", $rulesFile));
+            $pos = strpos($data, "<content>");
+            if($pos !== false)
+            {
+                $data = substr_replace($data, "", $pos, strlen("<content>"));
+            }
+
+            $pos = strrpos($data, "</content>");
+            if($pos !== false)
+            {
+                $data = substr_replace($data, "", $pos, strlen("</content>"));
+            }
+            
+            
             //Do stuff to the XLIFF file
             //$updatedXliffFile = Extractor::doStuffToXLIFF($file, $jobId, $componentName);
 
             // have to validate against all the datacategories  
             
             
-            $tabDelimitedOutput = validator::validate($file, $jobId, "locnote");                
+            $tabDelimitedOutput = validator::validate($file, $jobId, "translate",$data);                
             echo '<br> $tabDelimitedOutput: '.$tabDelimitedOutput; //IOK for testing	
 
 
