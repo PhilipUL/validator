@@ -20,15 +20,46 @@
     <datacat name="locnote">
         <inheritance appliesTo="onlyElements"/>
         <rulesElement name="locNoteRule"/>
-<!--        <localAdding datcatSelector="*[@*:its-loc-note] | its:span[@*:its-loc-note] | its:span[@*:locNote] | *[@*:locNote]"
-                addedMarkup="@*:its-loc-note | @*:its-loc-note[parent::its:span] | @*:locNote | @*:locNote[parent::its:span]"
-            />
-        <localAdding datcatSelector="*[@*:its-loc-note-type] | its:span[@*:its-loc-note-type] | its:span[@*:locNoteType] | *[@*:locNoteType]"
-            addedMarkup="@*:its-loc-note-type | @*:its-loc-note-type[parent::its:span] | @*:locNoteType | @*:locNoteType[parent::its:span]"
-        />-->
         <localAdding
-            datcatSelector="*[@its-loc-note] | its:span[@its-loc-note] | *[@its-loc-note-type] | its:span[@its-loc-note-type]| *[@its-loc-note-ref] | its:span[@its-loc-note-ref]"
-            addedMarkup="@its-loc-note |@its-loc-note-type | @its-loc-note-ref | @its-loc-note[parent::its:span] | @its-loc-note-type[parent::its:span] | @its-loc-note-ref[parent::its:span]"/>
-            
+            datcatSelector="*[@its-loc-note] | its:span[@its-loc-note] | *[@its-loc-note-type] | its:span[@its-loc-note-type]| *[@its-loc-note-ref] | its:span[@its-loc-note-ref] | its:span[@*:locNoteType] | *[@*:locNoteType]  | its:span[@*:locNote] | *[@*:locNote]  | its:span[@*:locNoteRef] | *[@*:locNoteRef]"
+            addedMarkup="@its-loc-note |@its-loc-note-type | @its-loc-note-ref | @its-loc-note[parent::its:span] | @its-loc-note-type[parent::its:span] | @its-loc-note-ref[parent::its:span] | @*:locNote | @*:locNote[parent::its:span] | @*:locNoteType | @*:locNoteType[parent::its:span] | @*:locNoteRef | @*:locNoteRef[parent::its:span]"/>
+    </datacat>
+<!--    <datacat name="domain">
+        <inheritance appliesTo="elementsAndAttributes"/>
+        <rulesElement name="domainRule"/>
+        <localAdding
+            datcatSelector="*[@*:domainPointer] | *[@*:domainMapping]"
+            addedMarkup="@*:domainPointer | @*:domainPointer[parent::its:span] | @*:domainMapping | @*:domainMapping[parent::its:span]"/>
+    </datacat>-->
+    <datacat name="domain">
+        <inheritance appliesTo="elementsAndAttributes"/>
+        <rulesElement name="domainRule"/>
+    </datacat>
+    <datacat name="directionality">
+        <inheritance appliesTo="elementsAndAttributes"/>
+        <rulesElement name="dirRule"/>
+        <defaults>
+                <defaultsElements dir="ltr"/>
+                <defaultsAttributes dir="ltr"/>
+        </defaults>
+<!--        <localAdding
+            datcatSelector="*[@*:dir]"
+            addedMarkup="@*:dir"/>-->
+    </datacat>
+    <datacat name="ruby">
+        <rulesElement name="rubyRule"/>
+<!--        <localAdding
+            datcatSelector="*[@*:rubyPointer] | *[@*:rpPointer] | *[@*:rubyText] | *[@*:rtPointer]"
+            addedMarkup="@*:dir"/>-->
+    </datacat>
+    <datacat name="ElementsWithinText">
+        <rulesElement name="withinTextRule"/>
+        <defaults>
+                <defaultsElements withinText="no"/>
+                <defaultsAttributes withinText="no"/>
+        </defaults>
+        <localAdding
+            datcatSelector="*[@withinText]"
+            addedMarkup="@*:withinText"/>
     </datacat>
 </datacats>

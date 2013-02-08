@@ -109,74 +109,13 @@ static public function alphabeticOrder($data)
 
 static public function clenseIts(&$data, &$datacat)
 {	
-//         $result=$data;
-//        $dataArray = split("\n/", $data);
-//        $result ="";
-//        foreach($dataArray as $line){
-//            $line="/".$line;
-//            //echo $line;
-//            // split the line by tab, as this should split by attributes
-//            
-//            $temp1 = split("\t",$line);
-//            unset($line);
-//            $temp = array();
-//            for($i = 0; $i < sizeof($temp1); $i++)
-//                {
-//                if($i=0)$temp[]=&$temp1[$i];
-//                else{
-//                    $temp[]=&$temp1[$i];
-//                     if(strpos($temp[$i], "=")===false)  continue;
-//                     if(isset ($temp[$i+1])&& strpos($temp[$i+1], "=")===false) $temp[$i].=$temp[$i+1];
-//                }
-//           }
-//           unset($temp1);
-//           
-//            $result.=$temp[0];
-//            unset ($temp[0]);
-//            if(sizeof($temp)>=2){
-//                
-//                for($i = 1; $i < sizeof($temp); $i++)
-//                {
-//                    
-//                    if($datacat == "translate")
-//                    {
-//                        $temp[$i] ="\t".strtolower(str_replace("its:", "",$temp[$i]));
-//                    } else if($datacat == "locnote")
-//                    {
-//                       
-//                        $pair= split("=", str_replace("its:", "",$temp[$i]));
-//                      
-//                        if(strcasecmp("its-loc-note", $pair[0])==0){ 
-//                            $temp[$i]="locNote={$pair[1]}";
-//                        }else if(strcasecmp("its-loc-note-type", $pair[0])==0){
-//                            $temp[$i]="locNoteType=".strtolower($pair[1]);
-//                        }
-//                    }   
-//
-//                }
-//                // sort array alphabetically index 1 to end 
-//                asort($temp);
-//                echo "<br>";
-//                foreach($temp as $str)
-//                {
-//                    $result.= "\t".$str;
-//                }
-//            }
-//            $result.="\n";
-//            
-//            
-//        }
-//        
-//        //if(strpos($result,"<!DOCTYPE"."html>");  
- 
-        
-       
-    $result=$data;   
     
     // split document by \n/
     $dataArray = split("\n/", $data);
     $result ="";
     $first = true; 
+    $keyValueArray = array();
+    $toBeMapped = array();
     foreach($dataArray as $line)
     {
         echo "<br>";
@@ -209,13 +148,112 @@ static public function clenseIts(&$data, &$datacat)
         }
         sort($atribs);
         print_r($atribs);
+        $k = 0;
+        // loop through the different atribues, e.g. domain mapping and domain pointer 
         for($i = 0; $i < sizeof($atribs); $i++)
         {
 
             if($datacat == "translate")
+            {   
+                $result.="\t".strtolower($atribs[$i]);
+            } 
+            else if($datacat == "domain")
+            {
+                echo "in domain <br>";
+                
+                
+                $pos = strpos($atribs[$i], "domainMapping");
+                if($pos !== false)
+                {
+                    // split by ""
+                    preg_match('/"([^"]+)"/', $atribs[$i], $quotes);
+                    if(isset($quotes[1]))
+                    {
+                        // iterate through all the comma separteted elements in domainMapping
+                        $commas = split(",", $quotes[1]);
+                        foreach($commas as $comma)
+                        {
+                            trim($comma);
+                            // if the comma element contains ''
+                            preg_match("/'([^']+)'/", $comma, $singleQuotes);
+                            if(sizeof($singleQuotes) < 1)
+                            {
+                                $mapKeyPair = split(" ", $comma);
+                                
+                                if(sizeof($mapKeyPair) == 2)
+                                {
+                                    // check if it's already in the array
+                                    if(in_array($mapKeyPair[0], $keyValueArray) == false)
+                                    {
+                                        $keyValueArray[$mapKeyPair[0]] = $mapKeyPair[1];
+                                    }
+                                }
+                            } elseif(sizeof($singleQuotes) == 2)
+                            {
+                                //echo "======= ".$comma."=======";
+                                $mapKeyPair = split("'", $comma);
+                                //print_r($mapKeyPair);
+                                
+                                // check if it's already in the array
+                                if(in_array($mapKeyPair[1], $keyValueArray) == false)
+                                {
+                                    $keyValueArray[$mapKeyPair[1]] = trim($mapKeyPair[2]);
+                                }
+                                
+                            }
+                        }
+
+                    }
+                    print_r($keyValueArray);
+                } 
+                
+                // if we're on the domainPointer attribute
+                $pos = strpos($atribs[$i], "domainPointer");
+                if($pos !== false)
+                {
+                    // split by ""
+                    preg_match('/"([^"]+)"/', $atribs[$i], $quotes);
+                    if(isset($quotes[1]))
+                    {
+                        $commas = split(",", $quotes[1]);
+                        
+                        foreach($commas as $comma)
+                        {
+                            trim($comma);
+                            echo "======in here=======";
+                            // if there is an APOSTROPHE at the start or end of the element, get rid of it
+                            if(strcmp(substr($comma, 0, 1), "'") == true | strcmp(substr($comma, -0, 1), "'") == true)
+                            {
+                                unset($comma);
+                            }
+                        }
+                        
+                        echo "commas array = ";
+                        print_r($commas);
+                        $toBeMapped = $commas;
+                        
+                    }
+
+                }
+                
+                echo "<br>array to be mapped: ";
+                print_r($toBeMapped);
+                
+                for($i = 0; $i < sizeof($toBeMapped); $i++)
+                {
+                    if (array_key_exists($toBeMapped[$i], $keyValueArray) == true)
+                    {
+                        $result.="\t".strtolower("domains=".'"'.$keyValueArray[$toBeMapped[$i]].'"');
+                    } else {
+                        $result.="\t".strtolower("domains=".'"'.$toBeMapped[$i].'"');
+                    }
+                }
+            }
+            else if($datacat == "ruby")
             {
                 $result.="\t".strtolower($atribs[$i]);
-            } else if($datacat == "locnote")
+            }
+            else if($datacat == "locnote")
             {
                 echo "entered locnote \n";
                 $atribs[$i]=str_replace("its-loc-note", "locNote", $atribs[$i]);
@@ -223,7 +261,9 @@ static public function clenseIts(&$data, &$datacat)
                 $pair= split("=", $atribs[$i]);
                 if(strcasecmp("locNote", $pair[0])==0){ 
                     echo "loc-note atrib \n";
-                    $result.="\tlocNote={$pair[1]}";
+//                    $result.="\tlocNote={$pair[1]}";
+                    $temp = ereg_replace("\n", "", $pair[1]);
+                    $result.="\tlocNote=".$temp;
                 }else if(strcasecmp("locNoteType", $pair[0])==0){
                     echo "loc-note-type atrib \n";
                     $result.="\tlocNoteType=".strtolower($pair[1]);
@@ -256,7 +296,28 @@ static public function validate($data, $jobid, $dataCategory,$rules=null)
                 $request->setMethod(HTTP_Request2::METHOD_GET);
                 $response = $request->send();
                 
-                $resourceFilename = file_get_contents($baseURL."get_resource_filename.php?id=$jobid&type=ITS");
+                $requestFilename = new HTTP_Request2($baseURL."/get_resource_filename.php?id=$jobid&type=ITS");
+                $requestFilename->setMethod(HTTP_Request2::METHOD_GET);
+                $responseFilename = $requestFilename->send();
+                
+                if(200 == $responseFilename->getStatus())
+                {
+                    //trim the response for the rules file filename
+                    $resourceFilename = $responseFilename->getBody();
+                    $pos = strpos($resourceFilename, "<content>");
+                    if($pos !== false)
+                    {
+                        $resourceFilename = substr_replace($resourceFilename, "", $pos, strlen("<content>"));
+                    }
+
+                    $pos = strrpos($resourceFilename, "</content>");
+                    if($pos !== false)
+                    {
+                        $resourceFilename = substr_replace($resourceFilename, "", $pos, strlen("</content>"));
+                    }
+                    
+                    
+                }
                 
                 if (200 == $response->getStatus()) 
                 {
@@ -341,13 +402,13 @@ static public function validate($data, $jobid, $dataCategory,$rules=null)
         echo "<br> java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/nodelist-with-its-information.xml ".$ITS_Path."uploads/$jobid/inputfile.xml ".$ITS_Path."uploads/$jobid/intermediate.xsl";
         
         shell_exec("chmod 777 -R ".$ITS_Path."uploads/$jobid/");
-        shell_exec("java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/output.txt ".$ITS_Path."uploads/$jobid/nodelist-with-its-information.xml ".$ITS_Path."tools/tabdelimiting.xsl");
+        shell_exec("java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/output1.txt ".$ITS_Path."uploads/$jobid/nodelist-with-its-information.xml ".$ITS_Path."tools/tabdelimiting.xsl");
         
-        echo "<br> java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/output.txt ".$ITS_Path."uploads/$jobid/nodelist-with-its-information.xml ".$ITS_Path."tools/tabdelimiting.xsl";
+        echo "<br> java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/output1.txt ".$ITS_Path."uploads/$jobid/nodelist-with-its-information.xml ".$ITS_Path."tools/tabdelimiting.xsl";
         shell_exec("chmod 777 -R ".$ITS_Path."uploads/$jobid/");
         
         
-        $output = file_get_contents($ITS_Path."uploads/$jobid/output.txt");
+        $output = file_get_contents($ITS_Path."uploads/$jobid/output1.txt");
         $output = str_replace("text=\t","",str_replace("path=/","/", $output));
         $output = str_replace("\t\n","\n", str_replace("    ","\t", $output));
         
