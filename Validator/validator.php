@@ -142,16 +142,34 @@ static public function clenseIts(&$data, &$datacat)
                 
                 for($x=$i;isset ($temp[$x+1])&& strpos($temp[$x+1], "=")===false;$x++){
                     $current.=$temp[$x+1];
+                    echo " added lines together";
                 }
                 $atribs[]=str_replace("its:", "",$current);
+                
             }
         }
+
         sort($atribs);
         print_r($atribs);
         $k = 0;
         // loop through the different atribues, e.g. domain mapping and domain pointer 
         for($i = 0; $i < sizeof($atribs); $i++)
         {
+            // first get rid of new lines in attribs
+            $atribs[$i] = trim(preg_replace('/\s+/', ' ', $atribs[$i]));
+            $atribs[$i] = trim($atribs[$i]);
+            // make sure the attribute ends with the correct number of quotes
+            if(substr_count($atribs[$i], '"')%2 == 1)
+            {
+                $atribs[$i] = $atribs[$i].'"';
+            }
+            if(substr($atribs[$i], strlen($atribs[$i])-1) != '"')
+            {
+//                echo "attribute doesn't end in the thing";
+//                echo $atribs[$i];
+                
+                $atribs[$i] = $atribs[$i].'"';
+            }
 
             if($datacat == "translate")
             {   
@@ -251,23 +269,67 @@ static public function clenseIts(&$data, &$datacat)
             }
             else if($datacat == "ruby")
             {
-                $result.="\t".strtolower($atribs[$i]);
+                $result.="\t".$atribs[$i].'"';
             }
             else if($datacat == "locnote")
             {
-                echo "entered locnote \n";
+                //echo "entered locnote \n";
                 $atribs[$i]=str_replace("its-loc-note", "locNote", $atribs[$i]);
                 $atribs[$i]=str_replace("its-loc-note-type", "locNoteType", $atribs[$i]);
+                
                 $pair= split("=", $atribs[$i]);
+                //print_r($pair);
                 if(strcasecmp("locNote", $pair[0])==0){ 
-                    echo "loc-note atrib \n";
+                    //echo "loc-note atrib \n";
 //                    $result.="\tlocNote={$pair[1]}";
                     $temp = ereg_replace("\n", "", $pair[1]);
                     $result.="\tlocNote=".$temp;
+                    if(isset($atribs[$i+1]) == false)
+                    {
+                        $atribs[$i+1] = 'locNoteType="description"';
+                    }
                 }else if(strcasecmp("locNoteType", $pair[0])==0){
-                    echo "loc-note-type atrib \n";
+                    //echo "loc-note-type atrib \n";
                     $result.="\tlocNoteType=".strtolower($pair[1]);
+                } else if(strcasecmp("locNotePointer", $pair[0])==0 )
+                {
+                    //echo "loc-note-pointer atrib \n";
+                    // clean up attribute string
+                    if(stripos($pair[1], '"')!== false)
+                    {
+                        $tempClean =  stripos($pair[1], '"');
+                        $pair[1] = '"'.trim(substr($pair[1], $tempClean+1));
+                        
+                    }
+                            
+                    $result.="\tlocNote=".$pair[1];
+                    if(isset($atribs[$i+1]) == false)
+                    {
+                        
+                        $atribs[$i+1] = 'locNoteType="description"';
+                    }
+                }else if(strcasecmp("locNoteRef", $pair[0])==0 )
+                {
+                    //echo "loc-note-pointer atrib \n";
+                    echo "pair 1:".$pair[1];
+                            
+                    $result.="\tlocNoteRef=".$pair[1];
+                    if(isset($atribs[$i+1]) == false)
+                    {
+                        
+                        $atribs[$i+1] = 'locNoteType="description"';
+                    }
+                }else if(strcasecmp("locNoteRefPointer", $pair[0])==0 )
+                {
+                    //echo "loc-note-pointer atrib \n";
+                    echo "pair 1:".$pair[1];
+                            
+                    $result.="\tlocNoteRef=".$pair[1];
+                }else{
+                    $result.=$atribs[$i];
                 }
+                
+                
             }   
 
         }
@@ -394,11 +456,11 @@ static public function validate($data, $jobid, $dataCategory,$rules=null)
         file_put_contents($ITS_Path."uploads/$jobid/$resourceFilename", $rules);
         
         
-        shell_exec("java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/intermediate.xsl ".$ITS_Path."tools/datacategories-definition.xml ".$ITS_Path."uploads/$jobid/datacategories-2-xsl.xsl inputDatacats=$dataCategory inputDocUri=".$ITS_Path."uploads/$jobid/inputfile.xml");
+        file_put_contents($ITS_Path."uploads/$jobid/errorsIntermediate.txt",shell_exec("java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/intermediate.xsl ".$ITS_Path."tools/datacategories-definition.xml ".$ITS_Path."uploads/$jobid/datacategories-2-xsl.xsl inputDatacats=$dataCategory inputDocUri=".$ITS_Path."uploads/$jobid/inputfile.xml 2>&1"));
         echo "<br>java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/intermediate.xsl ".$ITS_Path."tools/datacategories-definition.xml ".$ITS_Path."uploads/$jobid/datacategories-2-xsl.xsl inputDatacats=$dataCategory inputDocUri=".$ITS_Path."uploads/$jobid/inputfile.xml";
         //shell_exec("chmod 777 -R ".$ITS_Path."uploads/$jobid/");
         
-        shell_exec("java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/nodelist-with-its-information.xml ".$ITS_Path."uploads/$jobid/inputfile.xml ".$ITS_Path."uploads/$jobid/intermediate.xsl");
+        file_put_contents($ITS_Path."uploads/$jobid/errorsNodelistWithITSInfo.txt", shell_exec("java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/nodelist-with-its-information.xml ".$ITS_Path."uploads/$jobid/inputfile.xml ".$ITS_Path."uploads/$jobid/intermediate.xsl 2>&1"));
         echo "<br> java -jar ".$ITS_Path."lib/saxon9he.jar -o:".$ITS_Path."uploads/$jobid/nodelist-with-its-information.xml ".$ITS_Path."uploads/$jobid/inputfile.xml ".$ITS_Path."uploads/$jobid/intermediate.xsl";
         
         shell_exec("chmod 777 -R ".$ITS_Path."uploads/$jobid/");

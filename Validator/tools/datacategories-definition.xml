@@ -21,7 +21,7 @@
         <inheritance appliesTo="onlyElements"/>
         <rulesElement name="locNoteRule"/>
         <localAdding
-            datcatSelector="*[@its-loc-note] | its:span[@its-loc-note] | *[@its-loc-note-type] | its:span[@its-loc-note-type]| *[@its-loc-note-ref] | its:span[@its-loc-note-ref] | its:span[@*:locNoteType] | *[@*:locNoteType]  | its:span[@*:locNote] | *[@*:locNote]  | its:span[@*:locNoteRef] | *[@*:locNoteRef]"
+            datcatSelector="*[@its-loc-note[not(ancestor::*:rules)]] | its:span[@its-loc-note[not(ancestor::*:rules)]] | *[@its-loc-note-type[not(ancestor::*:rules)]] | its:span[@its-loc-note-type[not(ancestor::*:rules)]]| *[@its-loc-note-ref] | its:span[@its-loc-note-ref] | its:span[@*:locNoteType] | *[@*:locNoteType[not(ancestor::*:rules)]]  | its:span[@*:locNote[not(ancestor::*:rules)]] | *[@*:locNote[not(ancestor::*:rules)]]  | its:span[@*:locNoteRef[not(ancestor::*:rules)]] | *[@*:locNoteRef[not(ancestor::*:rules)]]"
             addedMarkup="@its-loc-note |@its-loc-note-type | @its-loc-note-ref | @its-loc-note[parent::its:span] | @its-loc-note-type[parent::its:span] | @its-loc-note-ref[parent::its:span] | @*:locNote | @*:locNote[parent::its:span] | @*:locNoteType | @*:locNoteType[parent::its:span] | @*:locNoteRef | @*:locNoteRef[parent::its:span]"/>
     </datacat>
 <!--    <datacat name="domain">
@@ -47,10 +47,11 @@
             addedMarkup="@*:dir"/>-->
     </datacat>
     <datacat name="ruby">
+        <inheritance appliesTo="none"/>
         <rulesElement name="rubyRule"/>
-<!--        <localAdding
+        <localAdding
             datcatSelector="*[@*:rubyPointer] | *[@*:rpPointer] | *[@*:rubyText] | *[@*:rtPointer]"
-            addedMarkup="@*:dir"/>-->
+            addedMarkup="*[@*:rubyPointer] | *[@*:rpPointer] | *[@*:rubyText] | *[@*:rtPointer]"/>
     </datacat>
     <datacat name="ElementsWithinText">
         <rulesElement name="withinTextRule"/>
